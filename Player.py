@@ -47,9 +47,12 @@ class ValueContainedCheckButton(Checkbutton):
         super().__init__(master, cnf)
         self.val = IntVar()
         self.configure(variable=self.val)
+    __value = False
+    def switchValue(self):
+        self.__value = not self.__value
         
     def getValue(self):
-        return bool(self.val.get())    
+        return self.__value #bool(self.val.get())    
     
 class Player:
     @staticmethod
@@ -78,11 +81,15 @@ class Player:
         result = []
         for child in children:
             chd = child.winfo_children()
+            print("scc:",chd[0].getValue(),chd[1].getCardObj().isDropable())
+                
             if(chd[0].getValue() and chd[1].getCardObj().isDropable()):
-                print(chd[0].getValue())
                 result.append(chd[1].getCardObj())
+        
         if(len(result)!=2):
+            print(children)
             print("error")
+            print(result)
             self.selectedCardCount=len(result)
             tkinter.messagebox.showinfo(StringData.getDlgTitle_cardPopError(),StringData.getDlgContent_cardPopError())
             result=[]
@@ -174,11 +181,13 @@ class Player:
                 return True
         return False
             
-    def ckbCommand(self):
+    def ckbCommand(self,cb):
+        cb.switchValue()
         print("ckbcommand")
     def chgCkb(self,cb):
         cb.toggle()
-        self.ckbCommand()
+        self.ckbCommand(cb)
+        print("cbval:",cb.getValue())
     def sortDeck(self):
         self.__hand.sort(key=lambda card: card.level)
     __rootFrameCanvas = None
@@ -199,13 +208,15 @@ class Player:
             for i in range(len(self.__hand)):
                 Grid.columnconfigure(self.__cFrame,i,weight=1)
                 p=PanedWindow(self.__cFrame,orient=VERTICAL)
-                cb = ValueContainedCheckButton(p,command=self.ckbCommand,width=0)
+                cb = ValueContainedCheckButton(p,width=0)
+                cb.config(command=lambda cb=cb: self.ckbCommand(cb))
+                
                 cb.pack(fill=X)
                 txt= self.__hand[i].getButtonTextFormat()
                 btn =CardButton(p,wraplength=30,height=8,text=txt).setMainText(self.__hand[i].getButtonTextFormat()).setSubText("Card"+str(i+1)).switchToMainText()
                 btn.setCardObj(self.__hand[i])
                 #img=btn.getImage()
-                btn.config(command=lambda cb=cb: self.chgCkb(cb),height=8) #command=lambda card=self.__hand[i],btn=btn:self.delCardFromFrame( btn,card,mgcls=mgcls,isPublicFrame=False))
+                btn.config(command=lambda cb1=cb: self.chgCkb(cb1),height=8) #command=lambda card=self.__hand[i],btn=btn:self.delCardFromFrame( btn,card,mgcls=mgcls,isPublicFrame=False))
                 btn.pack(fill=Y)
                 #btn.image = img
                 p.add(cb)
@@ -223,8 +234,10 @@ class Player:
             for i in range(len(self.__hand)):
                 Grid.columnconfigure(self.__cFrame,i,weight=1)
                 p=PanedWindow(self.__cFrame,orient=VERTICAL)
+                
                 txt= self.__hand[i].getButtonTextFormat()
-                cb = ValueContainedCheckButton(p,command=self.ckbCommand,width=0)
+                cb = ValueContainedCheckButton(p,width=0)
+                cb.config(command=lambda cb=cb: self.ckbCommand(cb))
                 cb.pack(fill=X)
                 btn =CardButton(p,wraplength=30,height=8).setMainText(self.__hand[i].getButtonTextFormat()).setSubText("Card"+str(i+1)).switchToMainText()
                 btn.setCardObj(self.__hand[i])

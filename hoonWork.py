@@ -69,10 +69,12 @@ class FailFrame(Frame) :
         self.widgetStore.append(yesbtn)
         self.widgetStore.append(nobtn)
         self.update()
-        
+    @property
+    def result(self):
+        return self.__result
     def proceed(self,value) :
         self.setResult(value)
-        self.__master.destroy()
+        self.__master.quit()
     def setResult(self,value):
         self.__result=value
     def getResult(self):

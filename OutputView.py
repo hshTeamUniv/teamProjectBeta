@@ -126,8 +126,8 @@ class OutputView(Frame):
         t = threading.Thread(target=self.threadWork ,args=(f5c,f2c,))
         t.start()
     @staticmethod
-    def showGUI():
-        window = Tk()
+    def showGUI(tk):
+        window = Toplevel()#tk
         screen_width = int(window.winfo_screenwidth()*0.97)
         screen_height = int(window.winfo_screenheight()*0.95)
         window.geometry(str(screen_width)+"x"+str(screen_height))

@@ -1,11 +1,20 @@
 ﻿from tkinter import *
 from StringData import *
+from WaitingRoom import *
 class InputView:
     @staticmethod
     def getWaitingRoomFrameWithRspParam(master,resp):
-        result = Frame(master)
-        iv = InputView()
-        iv.wr_init(result,master,resp)
+        result = WaitingRoom(master,resp)
+        #result = Frame(master)
+        #iv = InputView()
+        #iv.wr_init(result,master,resp)
+        return result
+    @staticmethod
+    def getWaitingRoomFrameWithWait(master,resp):
+        result = WaitingRoom(master,resp)
+        #result = Frame(master)
+        #iv = InputView()
+        #iv.wr_init(result,master,resp)
         return result
     def wr_init(self,frame,master,resp):
         frame.tk = master
@@ -179,22 +188,35 @@ class InputView:
                     isRightDir=False
         #self.resp['isRightDir']=isRightDir
         resp[key_isRightDir] = isRightDir
-        topframe.quit()    
+        topframe.quit()  
+        topframe.master.quit()  
     
     @staticmethod
-    def getPlayerNameList():
+    def getPlayerNameList(tk):
         response = {}
-        root = Tk()
+        root = tk#Tk()
         root.title("Waiting Room")
         wr= InputView.getWaitingRoomFrameWithRspParam(root,response)
         root.mainloop()
+        root.quit()
+        
+        response = wr.result
         return response
     @staticmethod
-    def getPlayerNameListWithParam(resp):
-        root = Tk()
-        root.title("Waiting Room")
-        wr = InputView.getWaitingRoomFrameWithRspParam(root,resp)
-        root.mainloop()
+    def getPlayerNameListWithParam(resp,tk):
+        root = tk#Tk()
+        
+        #window = Toplevel()
+        window.title("Waiting Room")
+        wr = InputView.getWaitingRoomFrameWithRspParam(window,resp)
+        #root.pack()
+        #root.mainloop()
+        #root.quit()
+        #window.pack()
+        #window.mainloop()
+        window.quit()
+        resp = wr.result
+        #del root
         return resp
 def main():
     playerNameList = {}
@@ -202,4 +224,4 @@ def main():
     while(playerNameList["user_name"] == [] or not ( 2<=len(playerNameList["user_name"])<=8)):
         playerNameList = InputView.getPlayerNameListWithParam(playerNameList)
     print(playerNameList)
-main()
+#main()

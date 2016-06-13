@@ -2,18 +2,24 @@ from Deck import *
 from Player import *
 from Card import *
 from OutputView import *
+from InputView import *
 from tkinter import *
+from pip._vendor.distlib.util import chdir
 class MainController:
-    def __init__(self,playerNames,direction):
-        players = [Player(name) for name in playerNames]
-        self.setDirectionAndSetNames(players,direction)
-        #self.direction = direction
-        #players = self.chooseDirection(players,direction)
-        #self.__playerNames = [p.name for p in players ]
-        self.__players={p.name:p for p in players}
+    def __init__(self,playerNames=None,direction=None):
         self.__failFrame=None
         self.__recordRank=[]
+        if(playerNames!=None and direction!=None):
+            self.setPlayerNamesAndDirection(playerNames,direction)
+    def setPlayerNamesAndDirection(self,playerNames=None,direction=None):
+        players = [Player(name) for name in playerNames]
+        self.setDirectionAndSetNames(players,direction)
+        self.__players={p.name:p for p in players}
         
+    @property
+    def playerNames(self):
+        return self.__playerNames
+    
     def chooseDirection(self,playerNameList,dir=True):
         if(len(playerNameList)>2 and dir == False):
             temp = playerNameList[1:]
@@ -185,9 +191,26 @@ class MainController:
     def initWidgetRefreshView(self):
         self.refreshDisplayedCardFrame()
         self.refreshPlayerRank()
-    def play(self):#noc
+    @property
+    def finalResult(self):
+        return self.__failFrame.result
+    def showInputView(self,tk):
+        for chd in tk.winfo_children():
+            chd.destroy()
+            del chd
+        
+        iv = InputView.getWaitingRoomFrameWithWait(tk)
+        #iv.
+    
+    def play(self,tk,showInputView=True,returnFinalValue=False):#noc
+        for chd in tk.winfo_children():
+            chd.destroy()
+            del chd
+        if(showInputView):
+            self.showInputView(tk)
         ovconfig = {}
         OV_ConfigKeys= OutputView.configKeyList()
+        self.__failFrame=None
         self.isPlayerPoppedCard=False
         self.isUserPulledCard=False
         self.isDropCardsMode=True
@@ -222,7 +245,7 @@ class MainController:
         self.distributeCardToPlayers(players,deck)
         
         
-        self.ov = OutputView.showGUI()
+        self.ov = OutputView.showGUI(tk)
         ovconfig[OV_ConfigKeys[0]] = self.changeText
         ovconfig[OV_ConfigKeys[1]] = self.popCards
         ovconfig[OV_ConfigKeys[2]] = self.shuffleCurrentHand
@@ -231,8 +254,38 @@ class MainController:
             
         self.ov.setInternalConfigs(ovconfig)
         self.ov.create_widgets()
-        
-        
         self.ov.master.mainloop()
-mc = MainController([("p"+str(i)) for i in range(1,5)],True)
-mc.play()
+        if(self.__failFrame!=None and returnFinalValue):
+            return self.__failFrame.result
+    @staticmethod
+    def main():
+        loopControl=True
+        mc = MainController()
+        
+        playerNameList = {"user_name":[],"isRightDir":True}
+        while(True):
+            tk = Tk()
+            #tk.
+            for chd in tk.winfo_children():
+                chd.destroy()
+                del chd
+            #tk = Tk()
+            playerNameList = InputView.getPlayerNameListWithParam(playerNameList,tk)
+            #while(playerNameList["user_name"] == [] or not ( 2<=len(playerNameList["user_name"])<=8)):
+            #    playerNameList = InputView.getPlayerNameListWithParam(playerNameList,tk)
+            #print(playerNameList["user_name"])
+            #mc.play(tk)
+            mc.setPlayerNamesAndDirection(playerNameList['user_name'],playerNameList['isRightDir'])
+            mc.play(tk,True)
+            result = False
+            try:
+                result = mc.finalResult
+            except:
+                pass
+            print("final result:",result)
+            if(not result):
+                break
+mc = MainController(["player"+str(i) for i in range(1,9)],True)
+tk = Tk()
+mc.play(tk,False)
+#MainController.main()
